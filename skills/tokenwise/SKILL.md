@@ -37,7 +37,9 @@ node <skill-dir>/scripts/analyze.mjs <path>     # a specific .jsonl, or a sessio
 - If it can't find a transcript, ask the user for the path, or list candidates
   with `ls -t ~/.claude/projects/*/*.jsonl | head`.
 
-The script prints one compact report. Read only that.
+The script prints one compact report — including an **exact session cost in dollars** (from the transcript's `usage` fields, priced per-model, with the 5-minute vs 1-hour cache-write split), a **cache-efficiency grade**, and a **quantified SAVINGS OPPORTUNITIES** section. Read only that.
+
+Pricing rates live at the top of `analyze.mjs` (dated). If the user says rates are stale, point them there.
 
 ## Step 2 — Interpret (know what actually costs money)
 
@@ -73,8 +75,9 @@ and give a specific fix. Draw from these levers:
 - **Trim generated output** — avoid re-summarizing; be terse.
 - **Prefer `git diff` / heads / `wc`** over dumping full files or command output.
 
-End with a one-line **"biggest single win"** — the single change that would have
-saved the most, with the estimated token-turns saved.
+Lead with the **session cost and grade** (the numbers the analyzer computed), then
+the prioritized fixes, then end with the **biggest single win** — the one change
+that would have saved the most, quoted in **dollars** and token-turns.
 
 Be honest: token estimates are transcript-chars ÷ 4 (the report says so). Don't
 present them as exact billing. The point is relative magnitude and direction.

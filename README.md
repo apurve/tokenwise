@@ -2,7 +2,7 @@
 
 # 🪙 tokenwise
 
-**Find out what actually burned your tokens in a Claude Code session — and how to spend less.**
+**See exactly what a Claude Code session cost you — in tokens _and dollars_ — and how to spend less.**
 
 `tokenwise` runs a tiny local analyzer over your session transcript (main **and** subagents) and shows you the real cost drivers: big tool results that re-bill on every later turn, redundant file reads, runaway subagents, and cache efficiency — then turns that into concrete, prioritized cuts.
 
@@ -10,7 +10,7 @@ The best part: the heavy parsing happens in a **zero-dependency Node script**, s
 
 [Install](#install) · [What you get](#what-you-get) · [How it works](#how-it-works) · [Why it's different](#why-its-different) · [FAQ](#faq)
 
-![read-only](https://img.shields.io/badge/mode-read--only-brightgreen) ![zero deps](https://img.shields.io/badge/deps-zero-blue) ![node](https://img.shields.io/badge/node-%E2%89%A518-black) ![license](https://img.shields.io/badge/license-MIT-black) ![works with](https://img.shields.io/badge/Claude%20Code-skill-orange)
+![read-only](https://img.shields.io/badge/mode-read--only-brightgreen) ![cost in $](https://img.shields.io/badge/cost-in%20real%20%24-brightgreen) ![zero deps](https://img.shields.io/badge/deps-zero-blue) ![node](https://img.shields.io/badge/node-%E2%89%A518-black) ![license](https://img.shields.io/badge/license-MIT-black) ![works with](https://img.shields.io/badge/Claude%20Code-skill-orange)
 
 </div>
 
@@ -40,32 +40,29 @@ Files analyzed: 1  (main: 1, subagents: 0)
 Models: claude-opus-4-8
 
 ── TOTALS ──
-Assistant turns: 205
-Output (generated) tokens: 240,501
-Input — uncached: 42,011 | cache-created: 1,478,990 | cache-read: 16,684,019
-Total tokens processed (billed mix): 18,445,521   | cache-read share: 92%
+Assistant turns: 245
+Output (generated) tokens: 301,820
+Input — uncached: 44,190 | cache-created: 2,381,164 | cache-read: 26,157,627
+Total tokens processed (billed mix): 28,884,801   | cache-read share: 92%
 
-── BIGGEST TOOL RESULTS (by size) ── these sit in context and re-bill on every later turn
-1. [Read] manual-test-verifier.md — ~4.9k tok @ turn 10/205
-2. [Read] qa-reviewer-agent.md — ~1.7k tok @ turn 9/205
-...
+── COST (exact — from usage fields, at listed $/MTok rates) ──
+Estimated session cost: $42.71    |    cache-efficiency grade: A (92% served from cache)
 
 ── HIGHEST COMPOUNDING FOOTPRINT ── size × turns it stayed in context (the real cost driver)
-1. [Read] manual-test-verifier.md — ~4.9k tok × 195 turns ≈ 958.6k tok-turns
-2. [Read] qa-reviewer-agent.md — ~1.7k tok × 196 turns ≈ 342.8k tok-turns
+1. [Read] manual-test-verifier.md — ~4.9k tok × 235 turns ≈ 1155.3k tok-turns
+2. [Read] qa-reviewer-agent.md — ~1.7k tok × 236 turns ≈ 412.8k tok-turns
 ...
 
 ── REDUNDANT READS (same file read ≥2×) ──
 • README.md — 3× (/Users/…/README.md)
 
-── TOOL BREAKDOWN (by result tokens pulled into context) ──
-• Read: 7 calls, ~8.8k tok of results
-• Bash: 30 calls, ~4.4k tok of results
-...
+── BIGGEST WIN ──
+Reading [Read] manual-test-verifier.md early cost ~$0.58 in cache re-reads (~1155k tok-turns).
+Reading only the needed span (say ~10% of it) would reclaim most of that.
 ```
 
-…and then Claude translates that into prioritized fixes:
-- *"Read `manual-test-verifier.md` cost ~958k token-turns — reading only the relevant span would've cut ~90% of it."*
+…and then Claude translates that into prioritized, **dollar-valued** fixes:
+- *"This session cost **$42.71** (grade A). The single biggest win: reading `manual-test-verifier.md` early cost ~$0.58 in cache re-reads — read the span, not the whole file."*
 - *"`README.md` was read 3× — it was already in context after the first."*
 - *"92% cache-read share — this session cached well; the win is smaller early reads, not caching."*
 
@@ -130,6 +127,7 @@ skills/tokenwise/
 
 ## Why it's different
 
+- **Real dollars, computed exactly** — not a token count you have to price yourself. It reads the transcript's exact `usage` fields (including the 5-minute vs 1-hour cache-write split) and applies per-model rates, then hands you a session cost, a per-model breakdown, a cache-efficiency grade, and **quantified savings opportunities** ("~$X reclaimable if you read spans, not whole files").
 - **It profiles the right thing** — ranks by *compounding footprint*, not raw size, so you fix what actually costs money.
 - **Sees subagents** — rolls up `subagents/*.jsonl` and shows how much spend happened off your main thread (often the real sink).
 - **Cheap to run, by construction** — the analyzer is deterministic local code; Claude only reads a small summary. It practices what it preaches.
