@@ -1,7 +1,7 @@
 ---
 name: tokenwise
 description: >-
-  Find out what burned tokens in a Claude Code session and how to cut it. Runs a
+  Find out what burned tokens in an AI agent session (Claude, Antigravity, etc.) and how to cut it. Runs a
   local, zero-dependency analyzer over the session transcript (main + subagents)
   and reports the biggest token drivers — large tool results that re-bill on
   every later turn, redundant file reads, subagent spend, cache efficiency — then
@@ -12,7 +12,7 @@ description: >-
 
 # tokenwise — where did the tokens go, and how to spend less
 
-Your job: analyze a Claude Code session's token usage and hand back a short,
+Your job: analyze an agent session's token usage and hand back a short,
 prioritized list of concrete cuts. The heavy lifting is a local script — you
 stay cheap by reading its **compact summary**, never the raw transcript.
 
@@ -25,25 +25,23 @@ stay cheap by reading its **compact summary**, never the raw transcript.
 The script lives next to this SKILL.md. Resolve this skill's directory and run:
 
 ```sh
-node <skill-dir>/scripts/analyze.mjs            # auto-detects THIS project's latest session
-node <skill-dir>/scripts/analyze.mjs <path>     # a specific .jsonl, or a session dir
+python3 <skill-dir>/scripts/analyze.py            # auto-detects THIS project's latest session
+python3 <skill-dir>/scripts/analyze.py <path>     # a specific .jsonl, or a session dir
 ```
 
-- No argument → it derives the current project's transcript dir from `cwd`
-  (`~/.claude/projects/<escaped-cwd>/`) and analyzes the most recent session
-  plus its `subagents/`.
+- No argument → it derives the current project's transcript dir and analyzes the most recent session
+  plus its subagents (if supported by the platform).
 - If the user points at a different session/agent, pass that `.jsonl` file or a
-  directory (it recurses into `subagents/`).
-- If it can't find a transcript, ask the user for the path, or list candidates
-  with `ls -t ~/.claude/projects/*/*.jsonl | head`.
+  directory (it recurses).
+- The script auto-detects the platform (Claude, Antigravity, etc.). You can force one with `--platform claude` or `--platform antigravity`.
 
-The script prints one compact report — including an **exact session cost in dollars** (from the transcript's `usage` fields, priced per-model, with the 5-minute vs 1-hour cache-write split), a **cache-efficiency grade**, and a **quantified SAVINGS OPPORTUNITIES** section. Read only that.
+The script prints one compact report — including an **exact session cost in dollars** (or estimated cost if exact token counts aren't logged), a **cache-efficiency grade**, and a **quantified SAVINGS OPPORTUNITIES** section. Read only that.
 
-Pricing rates live at the top of `analyze.mjs` (dated). If the user says rates are stale, point them there.
+Pricing rates live at the top of `analyze.py` (dated). If the user says rates are stale, point them there.
 
 ## Step 2 — Interpret (know what actually costs money)
 
-Ground truth about Claude Code token cost — use it to prioritize:
+Ground truth about agent token cost — use it to prioritize:
 
 - **Context compounds.** Every tool result stays in context and is re-sent on
   every later turn (as cache-read, which is cheaper but not free). A big result
@@ -71,7 +69,7 @@ and give a specific fix. Draw from these levers:
 - **Move big/expensive work into subagents** — so its context doesn't ride
   along in the main thread; or, if a subagent itself was heavy, tighten its
   scope and cap its tool calls.
-- **Cheaper model where the task allows** — Sonnet/Haiku for mechanical steps.
+- **Cheaper model where the task allows** — Gemini Flash / Claude Haiku for mechanical steps.
 - **Trim generated output** — avoid re-summarizing; be terse.
 - **Prefer `git diff` / heads / `wc`** over dumping full files or command output.
 
