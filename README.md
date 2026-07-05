@@ -74,10 +74,10 @@ Reading only the needed span (say ~10% of it) would reclaim most of that.
 
 ```sh
 # For Claude Code (default):
-git clone https://github.com/lohani-mohit/tokenwise.git && ./tokenwise/install.sh
+git clone https://github.com/apurve/tokenwise.git && ./tokenwise/install.sh
 
 # For Antigravity IDE:
-git clone https://github.com/lohani-mohit/tokenwise.git && ./tokenwise/install.sh --platform antigravity
+git clone https://github.com/apurve/tokenwise.git && ./tokenwise/install.sh --platform antigravity
 ```
 
 ### Manual
@@ -190,7 +190,7 @@ Issues and PRs welcome — especially new cost heuristics (e.g. detecting large 
 
 ## License
 
-[MIT](./LICENSE) © Mohit Lohani
+[MIT](./LICENSE) © Apurve
 
 <div align="center">
 <sub>Built after watching one skill quietly spend 135k tokens. If tokenwise saves you some, drop a ⭐.</sub>
